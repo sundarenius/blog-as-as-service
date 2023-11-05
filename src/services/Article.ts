@@ -28,30 +28,38 @@ class ArticleService extends MongoTransactions implements ArticleRepository {
 
   async getOne(): Promise<Article | null> {
     const { id } = this.payload.getData();
-    // const data = await this.findOne({
-    //   query: { likeId },
-    // });
+    const data = await this.findOne({
+      query: { id },
+    });
 
-    return {} as any;
+    if (!data) throw new Error(`Article not found ${HttpStatusCodes.BAD_REQUEST}`);
+    
+    return data as any;
   }
 
   async getMany(filter: IFilter): Promise<Article[] | null> {
-    const { id } = this.payload.getData();
-    // const data = await this.findOne({
-    //   query: { likeId },
-    // });
+    // need to make a callback collection instead like in connect platform
+    const data = await this.findOne({
+      query: { filter },
+    });
 
-    return {} as any;
+    return data as any;
   }
 
   // create happens after an Accounts was made
   async create(): Promise<any> {
     const newData = this.payload.getData(true);
-    const newBlogData = await generateBlogPost(config as any);
+    const res = await generateBlogPost(config as any);
+    const newBlogData = new Article({
+      id: '',
+      title: '',
+      content: '',
+      created: new Date().getTime(),
+    });
+
     await this.createOne({
       newData: {
         ...newBlogData,
-        created: new Date().getTime(),
       },
     } as any);
 
@@ -61,7 +69,8 @@ class ArticleService extends MongoTransactions implements ArticleRepository {
   }
 }
 
-// Generate config from another collection
+// Generate config from another collection and choose random subject and category from an array.
+// Make another model with these values:
 const config = {
   subject: 'world politics',
   category: 'piece and security',
