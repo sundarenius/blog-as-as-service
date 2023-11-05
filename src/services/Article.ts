@@ -10,6 +10,7 @@ import {
   decodeJwtToken,
 } from '../utils/auth';
 import type { ArticleRepository } from '../repositories/ArticleRepository';
+import { generateBlogPost } from '../utils/create-blog-post';
 
 type IPayloadData = Partial<Article>
 
@@ -46,9 +47,10 @@ class ArticleService extends MongoTransactions implements ArticleRepository {
   // create happens after an Accounts was made
   async create(): Promise<any> {
     const newData = this.payload.getData(true);
+    const newBlogData = await generateBlogPost(config as any);
     await this.createOne({
       newData: {
-        ...newData,
+        ...newBlogData,
         created: new Date().getTime(),
       },
     } as any);
@@ -57,6 +59,14 @@ class ArticleService extends MongoTransactions implements ArticleRepository {
       msg: 'Succesfully created new article',
     };
   }
+}
+
+// Generate config from another collection
+const config = {
+  subject: 'world politics',
+  category: 'piece and security',
+  keywords: ['piece', 'security', 'Israel', 'War', 'Food', 'Water', 'Planet', 'Green future'],
+  previousTitles: [],
 }
 
 const article = async ({
