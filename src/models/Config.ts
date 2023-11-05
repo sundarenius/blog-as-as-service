@@ -2,7 +2,7 @@ import { Collections } from '../mongodb/mongo-config';
 import { HttpStatusCodes } from '../types/globals';
 
 export interface ConfigEntity {
-  id: string,
+  customerId: string,
   subjects: string[],
   categories: string[],
   keywords: string[],
@@ -11,7 +11,7 @@ export interface ConfigEntity {
 class Config implements ConfigEntity {
   public static collection = Collections.CONFIG;
 
-  id: string;
+  customerId: string;
 
   subjects: string[];
 
@@ -20,7 +20,7 @@ class Config implements ConfigEntity {
   keywords: string[];
 
   constructor(payload: ConfigEntity) {
-    this.id = payload.id;
+    this.customerId = payload.customerId;
     this.subjects = payload.subjects;
     this.categories = payload.categories;
     this.keywords = payload.keywords;
@@ -28,7 +28,7 @@ class Config implements ConfigEntity {
 
   getData(allRequired = false): Partial<ConfigEntity> {
     const data: any = {
-      id: this.id,
+      customerId: this.customerId,
       subjects: this.subjects,
       categories: this.categories,
       keywords: this.keywords,
