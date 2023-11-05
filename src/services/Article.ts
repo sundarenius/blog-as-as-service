@@ -27,9 +27,9 @@ class ArticleService extends MongoTransactions implements ArticleRepository {
   }
 
   async getOne(): Promise<Article | null> {
-    const { id } = this.payload.getData();
+    const { customerId } = this.payload.getData();
     const data = await this.findOne({
-      query: { id },
+      query: { customerId },
     });
 
     if (!data) throw new Error(`Article not found ${HttpStatusCodes.BAD_REQUEST}`);
@@ -49,9 +49,11 @@ class ArticleService extends MongoTransactions implements ArticleRepository {
   // create happens after an Accounts was made
   async create(): Promise<any> {
     const newData = this.payload.getData(true);
+    // get config from Config table and choose random category with subject
+    // also fetch previous titles
     const res = await generateBlogPost(config as any);
     const newBlogData = new Article({
-      id: '',
+      customerId: '',
       title: '',
       content: '',
       created: new Date().getTime(),

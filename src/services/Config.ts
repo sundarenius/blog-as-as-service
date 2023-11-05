@@ -26,9 +26,9 @@ class ConfigService extends MongoTransactions implements ConfigRepository {
   }
 
   async getOne(): Promise<Config | null> {
-    const { id } = this.payload.getData();
+    const { customerId } = this.payload.getData();
     const data = await this.findOne({
-      query: { id },
+      query: { customerId },
     });
 
     if (!data) throw new Error(`Config not found ${HttpStatusCodes.BAD_REQUEST}`);
