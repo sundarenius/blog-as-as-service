@@ -19,5 +19,6 @@ export enum MongoDbTransactionTypes {
 export const DbName = () => `${process.env.APP_NAME}-${process.env.NODE_ENV || process.env.ENVIRONMENT}`;
 
 export enum Collections {
-  ARTICLES = 'ARTICLES',
+  ARTICLES = 'articles',
+  CONFIG = 'config',
 }
