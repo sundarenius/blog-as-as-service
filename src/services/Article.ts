@@ -2,17 +2,15 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-undef */
 import type { IPayload, IFilter } from '../types/globals';
-import { Methods, HttpStatusCodes } from '../types/globals';
+import { Methods, HttpStatusCodes, ArticleStatus } from '../types/globals';
 import Article from '../models/Article';
 import MongoTransactions from '../mongodb/MongoTransactions';
 import {
   verifySimpleAuth,
 } from '../utils/auth';
 import type { ArticleRepository } from '../repositories/ArticleRepository';
-import { generateBlogPost } from '../utils/create-blog-post';
 import { Collections } from '../mongodb/mongo-config';
-import { getRandomFromArray } from '../utils/helpers';
-import { API } from '../http/http';
+import { getRandomFromArray, triggerAiJob } from '../utils/helpers';
 import { v4 as uuidv4 } from 'uuid';
 import { findFilterAndOrder } from '../mongodb/transactions';
 
@@ -74,7 +72,7 @@ class ArticleService extends MongoTransactions implements ArticleRepository {
       collectionCallback: async (collection: any) => {
         const res = await collection.find({})
         .sort({ created: -1 }) // Sort by created field in descending order (latest first)
-        .limit(20)             // Limit the result to 20 documents
+        .limit(30)             // Limit the result to x documents
         .project({ _id: 0, title: 1 }) // Only return the 'title' field, exclude '_id'
         .toArray();
         return res;
@@ -90,9 +88,9 @@ class ArticleService extends MongoTransactions implements ArticleRepository {
       previousTitles,
     })
 
-    const getNewArticleData: any = (data: any) => ({
+    const getNewArticleData: any = (data: any, articleId?: string) => ({
       customerId: newData.customerId,
-      articleId: uuidv4(),
+      articleId: articleId || uuidv4(),
       title: data.title,
       content: data.content,
       pictureUrl: data.pictureUrl,
@@ -111,43 +109,41 @@ class ArticleService extends MongoTransactions implements ArticleRepository {
         msg: 'Succesfully created new mock articles',
       };
     }
-    // get config from Config table and choose random category with subject
-    // also fetch previous titles
-    const aiRes: any = await generateBlogPost(blogAiConfig() as any);
 
-    if (!aiRes.message || !aiRes.message.content) {
-      throw new Error(`Could not create article ${HttpStatusCodes.INTERNAL_SERVER_ERROR}`);
-    }
-
-    const aiArticleData = JSON.parse(aiRes.message.content);
-
-    const getPictures = async (tag?: string) => await API.getPictures({ keyword: urlEncodeString(aiArticleData.keyword), tag });
-    const pictures = await getPictures(aiArticleData.tag);
-    let pictureUrl = '';
-
-    if (pictures.hits[0]) {
-      pictureUrl = pictures.hits[0].webformatURL;
-    } else {
-      const picturesWithoutTag = await getPictures('');
-      if (picturesWithoutTag.hits[0]) { pictureUrl = picturesWithoutTag.hits[0].webformatURL; }
-    }
-
-    const articleData = new Article(getNewArticleData(aiArticleData)).getData();
-
-    
-
+    const articleId = uuidv4();
     await this.createOne({
-      newData: articleData,
+      newData: {
+        customerId: newData.customerId,
+        articleId: articleId,
+        status: ArticleStatus.PENDING,
+        message: 'Job triggered'
+      },
+      collection: Collections.ARTICLE_STATUS,
     } as any);
 
+    // Do not have to wait for this to give client response
+    triggerAiJob({
+      createOne: this.createOne,
+      blogAiConfig,
+      Article,
+      getNewArticleData: (data: any) => getNewArticleData(data, articleId),
+      update: (newData: any) => {
+        this.updateOne({
+          query: {
+            customerId: newData.customerId,
+            articleId: articleId,
+          },
+          newData,
+          collection: Collections.ARTICLE_STATUS,
+        })
+      },
+    });
+
     return {
-      msg: 'Succesfully created new article',
+      msg: 'Succesfully triggered AI to generate new article. It will appear soon',
+      articleId,
     };
   }
-}
-
-function urlEncodeString(inputString: string) {
-  return encodeURIComponent(inputString);
 }
 
 const article = async ({

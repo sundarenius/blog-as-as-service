@@ -9,6 +9,12 @@ export enum HttpStatusCodes {
   OK = 200
 }
 
+export enum ArticleStatus {
+  PENDING = 'pending',
+  FAILED = 'failed',
+  SUCCESS = 'success',
+}
+
 export interface IPayload<I> {
   payload: I;
   method: Request['method'],

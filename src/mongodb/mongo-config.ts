@@ -22,4 +22,5 @@ export enum Collections {
   ACCOUNTS = 'accounts',
   ARTICLES = 'articles',
   CONFIG = 'config',
+  ARTICLE_STATUS = 'article-status'
 }

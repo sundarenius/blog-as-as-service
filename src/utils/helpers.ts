@@ -1,6 +1,8 @@
 import type { Response } from 'express';
 import type { IPayload } from '../types/globals';
-import { HttpStatusCodes } from '../types/globals';
+import { HttpStatusCodes, ArticleStatus } from '../types/globals';
+import { API } from '../http/http';
+import { generateBlogPost } from '../utils/create-blog-post';
 
 export const formatResponse = (
   body: IPayload<Record<any, any>>['payload'],
@@ -68,4 +70,55 @@ export function getRandomFromArray(arr: Array<number|string>) {
   }
   const randomIndex = Math.floor(Math.random() * arr.length);
   return arr[randomIndex];
+}
+
+function urlEncodeString(inputString: string) {
+  return encodeURIComponent(inputString);
+}
+
+export const triggerAiJob = async ({
+  createOne,
+  blogAiConfig,
+  Article,
+  getNewArticleData,
+  update,
+}: any) => {
+    // get config from Config table and choose random category with subject
+    // also fetch previous titles
+    try {
+      const aiRes: any = await generateBlogPost(blogAiConfig() as any);
+
+      if (!aiRes.message || !aiRes.message.content) {
+        throw new Error(`Could not create article ${HttpStatusCodes.INTERNAL_SERVER_ERROR}`);
+      }
+
+      const aiArticleData = JSON.parse(aiRes.message.content);
+
+      const getPictures = async (tag?: string) => await API.getPictures({ keyword: urlEncodeString(aiArticleData.keyword), tag });
+      const pictures = await getPictures(aiArticleData.tag);
+      let pictureUrl = '';
+
+      if (pictures.hits[0]) {
+        pictureUrl = pictures.hits[0].webformatURL;
+      } else {
+        const picturesWithoutTag = await getPictures('');
+        if (picturesWithoutTag.hits[0]) { pictureUrl = picturesWithoutTag.hits[0].webformatURL; }
+      }
+
+      const articleData = new Article(getNewArticleData(aiArticleData)).getData();
+
+      
+
+      const result = await createOne({
+        newData: articleData,
+      } as any);
+
+      if (result.insertedCount === 1) {
+        update({ status: ArticleStatus.SUCCESS, message: 'Done!' })
+      } else {
+        update({ status: ArticleStatus.FAILED, message: 'Article not inserted' })
+      }
+    } catch (err: any) {
+      update({ status: ArticleStatus.FAILED, message: err.message })
+    }
 }

@@ -55,7 +55,7 @@ Your response should be an stringified object like:
 {
   title: string # title of the post,
   content: string # content of the post, no introduction or summary
-  keyword: string # most relevant and generic keyword in ${data.language} for this post (I will use this fetch pictures from a gallery)
+  keyword: string # most relevant and generic keyword in ${data.language} for this post. Max two words.
   tag: string # choose the most relevant tag from this list: ${pixabayAcceptedCategories}
 }
 `
