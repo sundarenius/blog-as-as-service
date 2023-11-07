@@ -55,7 +55,8 @@ class ArticleService extends MongoTransactions implements ArticleRepository {
   }
 
   // create happens after an Accounts was made
-  async create(): Promise<any> {
+  async create(auth: string): Promise<any> {
+    verifySimpleAuth(auth);
     const newData = this.payload.getData();
     const customer = await this.findOne({ query: { customerId: newData.customerId }, collection: Collections.ACCOUNTS });
     if (!customer) throw new Error(`Customer not found ${HttpStatusCodes.BAD_REQUEST}`);
@@ -166,8 +167,7 @@ const article = async ({
     case Methods.GET:
       return getBodyRes(service.getOne);
     case Methods.POST:
-      verifySimpleAuth(auth);
-      return getBodyRes(filter ? () => service.getMany(filter) : service.create);
+      return getBodyRes(filter ? () => service.getMany(filter) : () => service.create(auth));
 
     default:
       throw new Error('Method not implemented.');

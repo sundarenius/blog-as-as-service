@@ -4,5 +4,5 @@ import type Article from '../models/Article';
 export interface ArticleRepository {
   getOne(): Promise<Article | null>;
   getMany(filter: IFilter): Promise<Partial<Article[]> | null>;
-  create(): Promise<void>;
+  create(auth: string): Promise<void>;
 }
