@@ -6,12 +6,10 @@ dotenv.config();
 const openai = new OpenAI();
 
 const msg = ({
-  subject,
   category,
   keywords,
   previousTitles,
-}: IGenerateBlogPost) => `I want you to generate a 500 - 1000 words long blog post. Act like an expert in your field.
-Subject: "${subject}"
+}: IGenerateBlogPost) => `Generate a 50 words long blog post. Be an expert in your field but humble.
 Category: "${category}"
 
 Include world events or current time period (such as holidays) that we are in into the context if it makes sense.
@@ -21,7 +19,7 @@ ${keywords.join(', ')}
 
 Embed your texts in <p> tags, and make a new <p> tag for each paragraph. Each paragraph should consist of maximum 200 words or 3-4 sentences.
 
-Also if possible, inclde 1 or 3 "a" html tags like "<a href={...} target='_blank'>" to reference a source to another website.
+Also if possible, include 1 or 3 "a" html tags like "<a href={...} target='_blank'>" to some reputable sites for reference or recommendation.
 
 Here are some previous "titles":
 ${previousTitles?.join(', ')}
@@ -35,10 +33,16 @@ First index is the "title" of the post.
 Second index is the content of the post, no introduction or summary.
 
 Third index is a "keyword" that is most relevant to your post that I will use to fetch from a picture gallery (Pixabay API) to include in the post.
+
+Your response should be an stringified object like:
+{
+  title: string,
+  content: string # content of the post,
+  keyword: most relevant and generic keyword to your post (I will use this fetch pictures from a gallery)
+}
 `
 
 interface IGenerateBlogPost {
-  subject: string,
   category: string,
   keywords: string[],
   previousTitles?: string[],

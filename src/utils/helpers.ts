@@ -1,5 +1,6 @@
 import type { Response } from 'express';
 import type { IPayload } from '../types/globals';
+import { HttpStatusCodes } from '../types/globals';
 
 export const formatResponse = (
   body: IPayload<Record<any, any>>['payload'],
@@ -44,4 +45,19 @@ export const deleteSensitive = (data: any) => {
     delete data.pwd;
     delete data.blockedUsers;
   }
+};
+
+export const getModelData = <IEntity>(allRequired: boolean, data: Record<any, any>) => {
+  // Remove properties with undefined values
+  Object.keys(data).forEach((key) => {
+    if (allRequired && data[key] === undefined) {
+      throw new Error(`This method requires all fields ${HttpStatusCodes.BAD_REQUEST}`);
+    }
+    if (typeof data[key] === 'string') {
+      data[key] = data[key].trim();
+    }
+    return data[key] === undefined && delete data[key];
+  });
+
+  return data as Partial<IEntity>;
 };

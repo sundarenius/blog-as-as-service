@@ -4,12 +4,12 @@
 import { MongoDbTransactionTypes } from './mongo-config';
 import { v4 as uuidv4 } from 'uuid';
 
-const newIdKey = '_signed_';
+const newIdKey = '_TID_';
 const generateNewId = (currentId: string) => {
   if (currentId && currentId.includes(newIdKey)) return currentId;
   const uuid = uuidv4();
-  const dayOfMonthSuffix = `${uuid}${newIdKey}-${new Date().getMinutes()}`;
-  return dayOfMonthSuffix;
+  const id = `${uuid}${newIdKey}-${new Date().getMinutes()}`;
+  return id;
 };
 
 const getTidFromID = (id: string) => {
@@ -19,14 +19,10 @@ const getTidFromID = (id: string) => {
 
 const getTid = (data: any) => {
   const {
-    userId,
-    conversationId,
+    customerId,
   } = data;
-  if (userId) {
-    return getTidFromID(userId);
-  }
-  if (conversationId) {
-    return getTidFromID(conversationId);
+  if (customerId) {
+    return getTidFromID(customerId);
   }
 };
 
@@ -41,18 +37,12 @@ const mongoTransactions = (collection: any): Record<MongoDbTransactionTypes, any
     return res;
   },
   [MongoDbTransactionTypes.INSERT_ONE]: async (newData: any) => {
-    const userId = generateNewId(newData.userId);
-    const conversationId = generateNewId(newData.conversationId);
-    const profileViewId = generateNewId(newData.profileViewId);
-    const likeId = generateNewId(newData.likeId);
-    const TID = getTid({ userId, conversationId });
+    const customerId = generateNewId(newData.customerId);
+    const TID = getTid({ customerId });
     const res = await collection.insertOne({
       ...newData,
+      customerId,
       created: new Date().getTime(),
-      ...newData.userId && { userId },
-      ...newData.profileViewId && { profileViewId },
-      ...newData.likeId && { likeId },
-      ...newData.conversationId && { conversationId },
       ...TID && { TID },
     });
     return res;
@@ -90,8 +80,6 @@ const mongoTransactions = (collection: any): Record<MongoDbTransactionTypes, any
       ...newData,
     };
     delete data.created;
-    delete data.userId;
-    delete data.recieverUserId;
     const res = await collection.updateOne({
       ...query,
       TID: getTid(query),
@@ -109,8 +97,6 @@ const mongoTransactions = (collection: any): Record<MongoDbTransactionTypes, any
       ...newData,
     };
     delete data.created;
-    delete data.userId;
-    delete data.recieverUserId;
     const res = await collection.updateMany({
       ...query,
       ...TID && { TID },

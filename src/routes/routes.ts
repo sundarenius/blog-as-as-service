@@ -3,6 +3,7 @@ import type { IPayload } from '../types/globals';
 import { HttpStatusCodes, Methods } from '../types/globals';
 import article from '../services/Article';
 import config from '../services/Config';
+import account from '../services/Account';
 
 export const formatErrorRes = (body: IPayload<unknown>['payload'], statusCode: HttpStatusCodes) => ({
   body,
@@ -42,6 +43,11 @@ export const routes = [
   {
     path: '/config',
     handler: (payload: IPayload<unknown>) => catchWrapper(config, payload),
+    Methods: [Methods.GET, Methods.POST],
+  },
+  {
+    path: '/account',
+    handler: (payload: IPayload<unknown>) => catchWrapper(account, payload),
     Methods: [Methods.GET, Methods.POST],
   },
 ];

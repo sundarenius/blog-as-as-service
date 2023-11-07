@@ -11,6 +11,7 @@ import {
 } from '../utils/auth';
 import type { ArticleRepository } from '../repositories/ArticleRepository';
 import { generateBlogPost } from '../utils/create-blog-post';
+import { Collections } from '../mongodb/mongo-config';
 
 type IPayloadData = Partial<Article>
 
@@ -48,33 +49,54 @@ class ArticleService extends MongoTransactions implements ArticleRepository {
 
   // create happens after an Accounts was made
   async create(): Promise<any> {
-    const newData = this.payload.getData(true);
-    // get config from Config table and choose random category with subject
-    // also fetch previous titles
-    const res = await generateBlogPost(config as any);
-    const newBlogData = new Article({
-      customerId: '',
-      title: '',
-      content: '',
-      created: new Date().getTime(),
+    const newData = this.payload.getData();
+    if (!newData.customerId) throw new Error(`Must pass in customerId ${HttpStatusCodes.BAD_REQUEST}`);
+
+    const configData = await this.findOne({
+      query: { customerId: newData.customerId },
+      collection: Collections.CONFIG
     });
 
-    await this.createOne({
-      newData: {
-        ...newBlogData,
-      },
-    } as any);
+    if (!configData) throw new Error(`No config found ${HttpStatusCodes.INTERNAL_SERVER_ERROR}`);
+
+    const blogConfig = {
+      category: getRandomFromArray(configData.categories),
+      keywords: configData.keywords,
+    }
+    // get config from Config table and choose random category with subject
+    // also fetch previous titles
+    const aiRes: any = await generateBlogPost(blogConfig as any);
+    // const newBlogData = new Article({
+    //   customerId: '',
+    //   title: '',
+    //   content: '',
+    //   created: new Date().getTime(),
+    // });
+
+    // await this.createOne({
+    //   newData: {
+    //     ...newBlogData,
+    //   },
+    // } as any);
 
     return {
       msg: 'Succesfully created new article',
+      article: aiRes,
     };
   }
+}
+
+function getRandomFromArray(arr: string[]) {
+  if (arr.length === 0) {
+    return null; // Return null if the array is empty
+  }
+  const randomIndex = Math.floor(Math.random() * arr.length);
+  return arr[randomIndex];
 }
 
 // Generate config from another collection and choose random subject and category from an array.
 // Make another model with these values:
 const config = {
-  subject: 'world politics',
   category: 'piece and security',
   keywords: ['piece', 'security', 'Israel', 'War', 'Food', 'Water', 'Planet', 'Green future'],
   previousTitles: [],
