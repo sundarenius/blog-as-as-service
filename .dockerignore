@@ -1,11 +1,9 @@
 **/node_modules
 **/.DS_Store
 **/certs
-**/lamour
 **/.vscode
 **/.env
 **/src
-**/lamour-dating-landing.zip
 data
 Dockerfile
 .dockerignore
