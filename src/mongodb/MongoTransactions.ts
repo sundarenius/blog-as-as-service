@@ -21,29 +21,29 @@ abstract class MongoTransactions {
     });
   }
 
-  findMany({ query, collectionCallback }: ITransactionParam) {
+  findMany({ query, collectionCallback, collection }: ITransactionParam) {
     return mongoInstance({
       transaction: MongoDbTransactionTypes.FIND,
       query,
-      collectionName: this.collection,
+      collectionName: collection || this.collection,
       collectionCallback,
     });
   }
 
-  createOne({ newData, collectionCallback }: ITransactionParam) {
+  createOne({ newData, collectionCallback, collection }: ITransactionParam) {
     return mongoInstance({
       transaction: MongoDbTransactionTypes.INSERT_ONE,
       newData,
-      collectionName: this.collection,
+      collectionName: collection || this.collection,
       collectionCallback,
     });
   }
 
-  createMany({ newData, collectionCallback }: ITransactionParam) {
+  createMany({ newData, collectionCallback, collection }: ITransactionParam) {
     return mongoInstance({
       transaction: MongoDbTransactionTypes.INSERT_MANY,
       newData,
-      collectionName: this.collection,
+      collectionName: collection || this.collection,
       collectionCallback,
     });
   }
@@ -78,20 +78,20 @@ abstract class MongoTransactions {
     });
   }
 
-  deleteOne({ query, collectionCallback }: ITransactionParam) {
+  deleteOne({ query, collectionCallback, collection }: ITransactionParam) {
     return mongoInstance({
       transaction: MongoDbTransactionTypes.DELETE_ONE,
       query,
-      collectionName: this.collection,
+      collectionName: collection || this.collection,
       collectionCallback,
     });
   }
 
-  deleteMany({ query, collectionCallback }: ITransactionParam) {
+  deleteMany({ query, collectionCallback, collection }: ITransactionParam) {
     return mongoInstance({
       transaction: MongoDbTransactionTypes.DELETE_MANY,
       query,
-      collectionName: this.collection,
+      collectionName: collection || this.collection,
       collectionCallback,
     });
   }
