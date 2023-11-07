@@ -77,11 +77,11 @@ function urlEncodeString(inputString: string) {
 }
 
 export const triggerAiJob = async ({
-  createOne,
+  createArticle,
   blogAiConfig,
   Article,
   getNewArticleData,
-  update,
+  updateStatus,
 }: any) => {
     // get config from Config table and choose random category with subject
     // also fetch previous titles
@@ -107,18 +107,14 @@ export const triggerAiJob = async ({
 
       const articleData = new Article(getNewArticleData(aiArticleData)).getData();
 
-      
-
-      const result = await createOne({
-        newData: articleData,
-      } as any);
+      const result = await createArticle(articleData);
 
       if (result.insertedCount === 1) {
-        update({ status: ArticleStatus.SUCCESS, message: 'Done!' })
+        updateStatus({ status: ArticleStatus.SUCCESS, message: 'Done!' })
       } else {
-        update({ status: ArticleStatus.FAILED, message: 'Article not inserted' })
+        updateStatus({ status: ArticleStatus.FAILED, message: 'Article not inserted' })
       }
     } catch (err: any) {
-      update({ status: ArticleStatus.FAILED, message: err.message })
+      updateStatus({ status: ArticleStatus.FAILED, message: err.message })
     }
 }

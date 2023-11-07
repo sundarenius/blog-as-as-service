@@ -124,11 +124,11 @@ class ArticleService extends MongoTransactions implements ArticleRepository {
 
     // Do not have to wait for this to give client response
     triggerAiJob({
-      createOne: this.createOne,
+      createArticle: (data: any) => this.createOne({ newData: data, collection: Collections.ARTICLES }),
       blogAiConfig,
       Article,
       getNewArticleData: (data: any) => getNewArticleData(data, articleId),
-      update: (newData: any) => {
+      updateStatus: (newData: any) => {
         this.updateOne({
           query: {
             customerId: newData.customerId,
