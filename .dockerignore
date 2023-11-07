@@ -3,7 +3,7 @@
 **/certs
 **/.vscode
 **/.env
-**/src
+dist
 data
 Dockerfile
 .dockerignore
