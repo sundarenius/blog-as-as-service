@@ -77,26 +77,19 @@ const urls = {
 
 const getUrl = () => urls.dev;
 
-const createAccount = async (_req, pwd, mail) => {
+const article = async (_req, pwd, mail) => {
   const payload = {
-    "pwd": encryptPwdV1(pwd),
-    "mail": mail,
-    "userId": "x",
-    "mailNotifications": {
-      "matches": true,
-      "likes": true,
-      "messages": true
-    },
-    "contactPreferences": "All",
-    "subscription": null,
-    "autoRenewal": true,
-    "trialTo": 1634524800000,
-    showPictures: 'All',
-  }
+    pictureUrl: 'https://pixabay.com/get/g6a26d9999b0968b5098c4f9ffbb135620c03db78a7fbfabf35a6768f0859926493bf6f6feb81f4beed6ed23dad0ac5299ecbad3b888b71975d5baa82c531e313_640.jpg',
+    category: 'Long-Distance Relationships',
+    title: 'Building Successful Long-Distance Relationships: Insights from a JW Singles Perspective',
+    created: 1699360050832,
+    id: Math.random() * 12999,
+    content: "<p>Long-distance relationships can pose unique challenges, but with the right approach, they can thrive. As a JW single, it's important to apply biblical principles and truths to your dating journey. By focusing on shared faith and values, you can establish a strong foundation from the start.</p><p>Online dating can be a useful tool, enabling JW singles to connect with like-minded individuals worldwide. Jehovas Witnesses dating site online are available, providing a platform tailored to the needs of JW singles.</p><p>However, success in long-distance relationships goes beyond technology. Regular communication, trust, and understanding are key. Make time for video calls, send handwritten letters, and always be open and honest with your partner.</p><p>Remember that true success is not measured solely by physical proximity, but by the love and commitment you share. Ultimately, it's God who watches over and blesses our relationships. By following His guidance and seeking His will, you can build a successful long-distance relationship that stands the test of time.</p>"
+  };
   const res = await _req(
     'POST',
     payload,
-    `${getUrl()}/account`,
+    `${getUrl()}/article`,
   )
 
   const { data } = res;
@@ -104,185 +97,8 @@ const createAccount = async (_req, pwd, mail) => {
   return data;
 }
 
-const createProfile = async (_req, gender, userName, pictures) => {
-  const payload = {
-    gender,
-    userName,
-    "dateOfBirth": "1990-01-01",
-    "continent": "North America",
-    "country": "United States",
-    "city": "New York",
-    "lastLogin": now(),
-    "modified": now(),
-    "created": now(),
-    userId: 'x',
-    "headline": "Hello World!",
-    "aboutMe": "I am a friendly person who loves to travel and explore new places.",
-    "aboutMyMatch": "I am looking for someone who shares my passion for adventure and has a great sense of humor.",
-    pictures,
-    "blockedUsers": ["blockedUser1", "blockedUser2"],
-    preferences: [
-      {
-        key: 'gender',
-        label: ['Gender'],
-        values: [gender === 'male' ? 'male' : 'female', gender === 'male' ? 'female' : 'male'],
-      },
-      {
-        key: 'location',
-        label: ['Match location'],
-        values: [null, ['Sweden', 'Denmark']],
-      },
-      {
-        key: 'ageInterval',
-        label: ['Age interval'],
-        values: [null, ['25 - 45']],
-      },
-      {
-        key: 'height',
-        label: ['Height', 'Min height'],
-        values: ['160 cm', '170 cm'],
-      },
-      {
-        key: 'attractiveness',
-        label: ['Attractiveness'],
-        values: ['Attractive', ['Average', 'Attractive', 'VeryAttractive']],
-      },
-      {
-        key: 'bodyType',
-        label: ['Body type'],
-        values: ['Athletic', 'All'],
-      },
-      {
-        key: 'relationshipStatus',
-        label: ['Relationship status'],
-        values: ['Single', 'All'],
-      },
-      {
-        key: 'educationLevel',
-        label: ['Educational level'],
-        values: ['High school', 'All'],
-      },
-      {
-        key: 'languages',
-        label: ['Languages'],
-        values: [['English', 'Swedish'], 'English'],
-      },
-      {
-        key: 'ethnicity',
-        label: ['Ethnicity'],
-        values: ['Mixed', 'All'],
-      },
-      {
-        key: 'drinkingHabits',
-        label: ['Drinking habits'],
-        values: ['Social drinker', 'All'],
-      },
-      {
-        key: 'hasKids',
-        label: ['Has kids'],
-        values: ['No', 'All'],
-      },
-      {
-        key: 'wantKids',
-        label: ['Want kids'],
-        values: ['Maybe', 'All'],
-      },
-      {
-        key: 'lookingFor',
-        label: ['Looking for'],
-        values: ['Marriage', 'Marriage'],
-      },
-      {
-        key: 'income',
-        label: ['Income'],
-        values: ['Enough', 'All'],
-      },
-    ],    
-  };
-
-  const res = await _req(
-    'POST',
-    payload,
-    `${getUrl()}/profile`,
-  )
-
-  const { data } = res;
-  return data;
-}
-
-const createMessage= async (_req, recieverUserId) => {
-  const payload = {
-    "userId": "x",
-    recieverUserId,
-    "youHaveRead": false,
-    "lastMessageSent": now(),
-    "conversationId": "x",
-    "archived": false
-  };
-
-  const res = await _req(
-    'POST',
-    payload,
-    `${getUrl()}/messages`,
-  )
-
-  const { data } = res;
-  return data;
-}
-
 const init = async () => {
   const accountOne = await createAccount(req(''), 'test', 'mail@mail.com');
-  const accountTwo = await createAccount(req(''), 'test', 'sundarenius@gmail.com');
-  const accountThree = await createAccount(req(''), 'test', 'emma@stone.com');
-  const userIdTwo = decodeJwtToken(accountTwo.token).userId;
-  await createProfile(
-    req(accountOne.token),
-    'female',
-    'some_women_123',
-    [
-      {
-        "main": true,
-        "url": "https://heroku-static.herokuapp.com/mega-fox.jpg"
-      },
-      {
-        "main": false,
-        "url": "https://cdn.britannica.com/75/191075-050-DC41EAFD/Megan-Fox-2012.jpg"
-      }
-    ]
-  );
-  await createProfile(
-    req(accountTwo.token),
-    'male',
-    'some_man_123',
-    [
-      {
-        "main": true,
-        "url": "https://heroku-static.herokuapp.com/chris-hemsworth.webp"
-      },
-      {
-        "main": false,
-        "url": "https://m.media-amazon.com/images/M/MV5BOTU2MTI0NTIyNV5BMl5BanBnXkFtZTcwMTA4Nzc3OA@@._V1_FMjpg_UX1000_.jpg"
-      }
-    ]
-  );
-  await createProfile(
-    req(accountThree.token),
-    'female',
-    'emma_stone_123',
-    [
-      {
-        "main": true,
-        "url": "https://m.media-amazon.com/images/M/MV5BMjI4NjM1NDkyN15BMl5BanBnXkFtZTgwODgyNTY1MjE@._V1_FMjpg_UX1000_.jpg"
-      },
-      {
-        "main": false,
-        "url": "https://cdn.britannica.com/78/194178-050-7ABF2B15/Emma-Stone-La-Land-Damien-Chazelle.jpg"
-      }
-    ]
-  );
-
-  await createMessage(req(accountOne.token), userIdTwo);
 }
 
 init();
-  

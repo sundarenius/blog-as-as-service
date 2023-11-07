@@ -61,3 +61,11 @@ export const getModelData = <IEntity>(allRequired: boolean, data: Record<any, an
 
   return data as Partial<IEntity>;
 };
+
+export function getRandomFromArray(arr: Array<number|string>) {
+  if (arr.length === 0) {
+    return null; // Return null if the array is empty
+  }
+  const randomIndex = Math.floor(Math.random() * arr.length);
+  return arr[randomIndex];
+}

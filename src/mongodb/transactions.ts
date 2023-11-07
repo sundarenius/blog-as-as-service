@@ -3,6 +3,7 @@
 /* eslint-disable max-len */
 import { MongoDbTransactionTypes } from './mongo-config';
 import { v4 as uuidv4 } from 'uuid';
+import type { IFilter } from '../types/globals'
 
 const newIdKey = '_TID_';
 const generateNewId = (currentId: string) => {
@@ -115,5 +116,32 @@ const mongoTransactions = (collection: any): Record<MongoDbTransactionTypes, any
     return res;
   },
 });
+
+export const findFilterAndOrder = (filter: IFilter) => async (collection: any): Promise<any[]> => {
+  // Constructing the filter criteria based on the provided filter object
+  const query: any = {};
+  const max = filter.max || 99;
+
+  // Sorting based on orderByKey field
+  const sort: any = {};
+  const sortField = filter.orderByKey;
+  sort[sortField] = -1; // 1 for ascending, -1 for descending
+
+  // Add keyMatch criteria to the query if provided
+  if (filter.keyMatch) {
+    Object.keys(filter.keyMatch).forEach(key => {
+      query[key] = { $in: (<any>filter.keyMatch)[key] };
+    });
+  }
+
+  // Performing the find operation with filter, sort, startIndex, and max
+  const res = await collection
+    .find(query)
+    .sort(sort)
+    .skip(filter.startIndex || 0)
+    .limit(max)
+    .toArray();
+  return res;
+};
 
 export default mongoTransactions;

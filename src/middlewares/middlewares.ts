@@ -12,6 +12,8 @@ export const formatPayloadAndReturnHandler = (
   console.log('payload:');
   console.log(payload);
 
+  // Special case, handle domain and map to customerId and add customerId to payload.
+
   let filter = null;
   if (payload.filter) {
     const clonePayload = JSON.parse(JSON.stringify(payload));

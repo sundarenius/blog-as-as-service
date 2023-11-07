@@ -11,7 +11,7 @@ import {
 } from '../utils/auth';
 import type { ConfigRepository } from '../repositories/ConfigRepository';
 
-type IPayloadData = Partial<Config>
+type IPayloadData = Partial<Config>;
 
 class ConfigService extends MongoTransactions implements ConfigRepository {
   collection = Config.collection;
@@ -23,6 +23,7 @@ class ConfigService extends MongoTransactions implements ConfigRepository {
     this.payload = new Config(payload as any);
     this.getOne = this.getOne.bind(this);
     this.create = this.create.bind(this);
+    this.update = this.update.bind(this);
   }
 
   async getOne(): Promise<Config | null> {
@@ -39,6 +40,8 @@ class ConfigService extends MongoTransactions implements ConfigRepository {
   // create happens after an Accounts was made
   async create(): Promise<any> {
     const newData = this.payload.getData(true);
+    const data = await this.findOne({ query: { customerId: newData.customerId } });
+    if (data) throw new Error(`CustomerID already exists in Config ${HttpStatusCodes.BAD_REQUEST}`);
 
     await this.createOne({
       newData,
@@ -46,6 +49,23 @@ class ConfigService extends MongoTransactions implements ConfigRepository {
 
     return {
       msg: 'Succesfully created new config',
+    };
+  }
+
+  // create happens after an Accounts was made
+  async update(): Promise<any> {
+    const newData = this.payload.getData();
+    const data = await this.findOne({ query: { customerId: newData.customerId } });
+    if (!data) throw new Error(`CustomerID do not exist ${HttpStatusCodes.BAD_REQUEST}`);
+
+
+    await this.updateOne({
+      query: { customerId: newData.customerId },
+      newData,
+    } as any);
+
+    return {
+      msg: 'Succesfully updated config',
     };
   }
 }
@@ -72,6 +92,8 @@ const config = async ({
       return getBodyRes(service.getOne);
     case Methods.POST:
       return getBodyRes(service.create);
+    case Methods.PUT:
+      return getBodyRes(service.update);
 
     default:
       throw new Error('Method not implemented.');

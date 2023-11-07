@@ -11,24 +11,24 @@ import path from 'path';
 
 const app: any = express();
 
-// const whiteListedOrigins: string[] = [
-//   'http://localhost:3000',
-//   'http://localhost:3030/',
-// ];
+const whiteListedOrigins: string[] = [
+  'http://localhost:3000',
+  'http://localhost:3030/',
+];
 
-// const corsOptionsDelegate = (req: any, callback: any) => {
-//   let corsOptions;
-//   if (whiteListedOrigins.includes(req.header('Origin'))) {
-//     corsOptions = { origin: true }; // reflect (enable) the requested origin in the CORS response
-//   } else {
-//     corsOptions = { origin: false }; // disable CORS for this request
-//   }
-//   callback(null, corsOptions); // callback expects two parameters: error and options
-// };
+const corsOptionsDelegate = (req: any, callback: any) => {
+  let corsOptions;
+  if (whiteListedOrigins.includes(req.header('Origin'))) {
+    corsOptions = { origin: true }; // reflect (enable) the requested origin in the CORS response
+  } else {
+    corsOptions = { origin: false }; // disable CORS for this request
+  }
+  callback(null, corsOptions); // callback expects two parameters: error and options
+};
 
 // USE AWS gateway for cors and auth
 const initExpressConfig = async () => {
-  // app.use(cors(corsOptionsDelegate));
+  app.use(cors(corsOptionsDelegate));
   app.use(logger('dev'));
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));

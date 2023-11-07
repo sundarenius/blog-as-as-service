@@ -1,51 +1,76 @@
 import OpenAI from 'openai';
 import dotenv from 'dotenv';
+import { getRandomFromArray } from './helpers';
 
 dotenv.config();
 
 const openai = new OpenAI();
 
-const msg = ({
-  category,
-  keywords,
-  previousTitles,
-}: IGenerateBlogPost) => `Generate a 50 words long blog post. Be an expert in your field but humble.
-Category: "${category}"
+const pixabayAcceptedCategories = [
+  'backgrounds',
+  'fashion',
+  'nature',
+  'science',
+  'education',
+  'feelings',
+  'health',
+  'people',
+  // 'religion',
+  'places',
+  'animals',
+  'industry',
+  'computer',
+  'food',
+  'sports',
+  'transportation',
+  'travel',
+  'buildings',
+  'business',
+  'music',
+];
 
-Include world events or current time period (such as holidays) that we are in into the context if it makes sense.
+const msg = (data: IGenerateBlogPost) => `Generate a ${getBlogPostLength()} words long blog post in ${data.language}.
 
-It should be SEO optimised, and you should use some of these keywords that is most relevent to the context (not all though).
-${keywords.join(', ')}
+Be expert in your field. But do not use overly academic words.
+
+Category: "${data.category}"
+
+${data.includeHolidays ? `Take into consideration if there are a special time period (such as holidays) right now into the context if it makes sense.` : ''}
+
+It should be SEO optimised, and you should use some of these keywords that is most relevent to the context (but not all).
+${data.keywords.join(', ')}
 
 Embed your texts in <p> tags, and make a new <p> tag for each paragraph. Each paragraph should consist of maximum 200 words or 3-4 sentences.
+
+Also add a few subtitles and logical sections in the text as <h3> tags.
 
 Also if possible, include 1 or 3 "a" html tags like "<a href={...} target='_blank'>" to some reputable sites for reference or recommendation.
 
 Here are some previous "titles":
-${previousTitles?.join(', ')}
+${data.previousTitles?.join(', ')}
 
 Make something different from them.
 
-Make this an array:
-
-First index is the "title" of the post.
-
-Second index is the content of the post, no introduction or summary.
-
-Third index is a "keyword" that is most relevant to your post that I will use to fetch from a picture gallery (Pixabay API) to include in the post.
-
 Your response should be an stringified object like:
 {
-  title: string,
-  content: string # content of the post,
-  keyword: most relevant and generic keyword to your post (I will use this fetch pictures from a gallery)
+  title: string # title of the post,
+  content: string # content of the post, no introduction or summary
+  keyword: string # most relevant and generic keyword in ${data.language} for this post (I will use this fetch pictures from a gallery)
+  tag: string # choose the most relevant tag from this list: ${pixabayAcceptedCategories}
 }
 `
 
+const getBlogPostLength = () => {
+  if (process.env.NODE_ENV !== 'production') return 20;
+  const lengths = [300, 400, 500, 800, 900];
+  return getRandomFromArray(lengths);
+};
 interface IGenerateBlogPost {
   category: string,
   keywords: string[],
   previousTitles?: string[],
+  includeHolidays: boolean,
+  language: string,
 }
 
 export const generateBlogPost = async (data: IGenerateBlogPost) => {

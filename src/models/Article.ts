@@ -5,7 +5,9 @@ export interface ArticleEntity {
   customerId: string,
   articleId: string,
   title: string,
+  category: string,
   content: string,
+  pictureUrl: string,
   created: number,
 }
 
@@ -18,7 +20,11 @@ class Article implements ArticleEntity {
 
   title: string;
 
+  category: string;
+
   content: string;
+
+  pictureUrl: string;
 
   created: number;
 
@@ -26,7 +32,9 @@ class Article implements ArticleEntity {
     this.customerId = payload.customerId;
     this.articleId = payload.articleId;
     this.title = payload.title;
+    this.category = payload.category;
     this.content = payload.content;
+    this.pictureUrl = payload.pictureUrl;
     this.created = payload.created;
   }
 
@@ -35,7 +43,9 @@ class Article implements ArticleEntity {
       customerId: this.customerId,
       articleId: this.articleId,
       title: this.title,
+      category: this.category,
       content: this.content,
+      pictureUrl: this.pictureUrl,
       created: this.created,
     };
 

@@ -43,7 +43,7 @@ export const routes = [
   {
     path: '/config',
     handler: (payload: IPayload<unknown>) => catchWrapper(config, payload),
-    Methods: [Methods.GET, Methods.POST],
+    Methods: [Methods.GET, Methods.POST, Methods.PUT],
   },
   {
     path: '/account',

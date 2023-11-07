@@ -40,6 +40,9 @@ class AccountService extends MongoTransactions implements AccountRepository {
   // create happens after an Accounts was made
   async create(): Promise<any> {
     const newData = this.payload.getData(true);
+    const data = await this.findOne({ query: { customerId: this.payload.customerId } });
+    if (data) throw new Error(`CustomerID already exists ${HttpStatusCodes.BAD_REQUEST}`);
+    
 
     await this.createOne({
       newData,

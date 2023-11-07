@@ -5,6 +5,8 @@ export interface ConfigEntity {
   customerId: string,
   categories: string[],
   keywords: string[],
+  includeHolidays: boolean
+  language: string,
 }
 
 class Config implements ConfigEntity {
@@ -16,10 +18,16 @@ class Config implements ConfigEntity {
 
   keywords: string[];
 
+  includeHolidays: boolean;
+
+  language: string;
+
   constructor(payload: ConfigEntity) {
     this.customerId = payload.customerId;
     this.categories = payload.categories;
     this.keywords = payload.keywords;
+    this.includeHolidays = payload.includeHolidays;
+    this.language = payload.language;
   }
 
   getData(allRequired = false): Partial<ConfigEntity> {
@@ -27,6 +35,8 @@ class Config implements ConfigEntity {
       customerId: this.customerId,
       categories: this.categories,
       keywords: this.keywords,
+      includeHolidays: this.includeHolidays,
+      language: this.language,
     };
 
     return getModelData<ConfigEntity>(allRequired, data);
