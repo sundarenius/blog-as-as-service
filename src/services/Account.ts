@@ -6,8 +6,7 @@ import { Methods, HttpStatusCodes } from '../types/globals';
 import Account from '../models/Account';
 import MongoTransactions from '../mongodb/MongoTransactions';
 import {
-  verifyJwtToken,
-  decodeJwtToken,
+  verifySimpleAuth,
 } from '../utils/auth';
 import type { AccountRepository } from '../repositories/AccountRepository';
 import { Collections } from '../mongodb/mongo-config';
@@ -62,9 +61,8 @@ const account = async ({
 }: IPayload<IPayloadData>) => {
   const service = new AccountService(payload as IPayloadData);
 
-  const tokenData: any = decodeJwtToken(auth);
   const getBodyRes = async (callback: any) => {
-    const res = await callback(tokenData);
+    const res = await callback();
     return {
       body: res,
       statusCode: 200,
@@ -73,8 +71,10 @@ const account = async ({
 
   switch (method) {
     case Methods.GET:
+      verifySimpleAuth(auth);
       return getBodyRes(service.getOne);
     case Methods.POST:
+      verifySimpleAuth(auth);
       return getBodyRes(service.create);
 
     default:

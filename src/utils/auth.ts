@@ -3,6 +3,13 @@ import { HttpStatusCodes } from '../types/globals';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 
+export const verifySimpleAuth = (auth: string) => {
+  const token = auth.split(' ')[1]
+  if (token !== process.env.MY_API_POST_KEY) {
+    throw new Error(`Not allowed ${HttpStatusCodes.UNAUTHORIZED}`);
+  }
+}
+
 const secretKey = 'a123asd98-x-dfdflkjdpppYHDNL83678';
 
 const extractTokenFromHeader = (authHeader: string) => {

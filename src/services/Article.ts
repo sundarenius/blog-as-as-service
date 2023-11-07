@@ -6,8 +6,7 @@ import { Methods, HttpStatusCodes } from '../types/globals';
 import Article from '../models/Article';
 import MongoTransactions from '../mongodb/MongoTransactions';
 import {
-  verifyJwtToken,
-  decodeJwtToken,
+  verifySimpleAuth,
 } from '../utils/auth';
 import type { ArticleRepository } from '../repositories/ArticleRepository';
 import { generateBlogPost } from '../utils/create-blog-post';
@@ -107,7 +106,7 @@ class ArticleService extends MongoTransactions implements ArticleRepository {
         const mockArticle = new Article(mockData).getData()
         await this.createOne({ newData: mockArticle} as any);
       }
-      // do not continure
+      // do not continue
       return {
         msg: 'Succesfully created new mock articles',
       };
@@ -159,9 +158,8 @@ const article = async ({
 }: IPayload<IPayloadData>) => {
   const service = new ArticleService(payload as IPayloadData);
 
-  const tokenData: any = decodeJwtToken(auth);
   const getBodyRes = async (callback: any) => {
-    const res = await callback(tokenData);
+    const res = await callback();
     return {
       body: res,
       statusCode: 200,
@@ -172,6 +170,7 @@ const article = async ({
     case Methods.GET:
       return getBodyRes(service.getOne);
     case Methods.POST:
+      verifySimpleAuth(auth);
       return getBodyRes(filter ? () => service.getMany(filter) : service.create);
 
     default:
