@@ -12,6 +12,3 @@ Dockerfile
 .netlify
 
 docker-compose.yml
-
-# Allow dist/src
-!**/dist/src
