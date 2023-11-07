@@ -51,6 +51,10 @@ ${data.previousTitles?.join(', ')}
 
 Make something different from them.
 
+Some rules:
+ - If the context is dating as a JW. Focus on them dating each other, not someone outside that wants to date them.
+ - Focus on high quality interesting texts.
+
 Your response should be an stringified object like:
 {
   title: string # title of the post,
@@ -62,7 +66,7 @@ Your response should be an stringified object like:
 
 const getBlogPostLength = () => {
   if (process.env.NODE_ENV !== 'production') return 20;
-  const lengths = [300, 400, 500, 800, 900];
+  const lengths = [400, 500, 800, 900, 1200];
   return getRandomFromArray(lengths);
 };
 interface IGenerateBlogPost {
