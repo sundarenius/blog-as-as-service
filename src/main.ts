@@ -14,6 +14,7 @@ const app: any = express();
 const whiteListedOrigins: string[] = [
   'http://localhost:3000',
   'http://localhost:3030/',
+  'http://13.48.104.149' // ec2 instance
 ];
 
 const corsOptionsDelegate = (req: any, callback: any) => {
