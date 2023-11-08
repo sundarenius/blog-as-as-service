@@ -14,7 +14,7 @@ import { getRandomFromArray, triggerAiJob } from '../utils/helpers';
 import { v4 as uuidv4 } from 'uuid';
 import { findFilterAndOrder } from '../mongodb/transactions';
 
-type IPayloadData = Partial<Article> & { mock?: boolean }
+type IPayloadData = Partial<Article> & { mock?: boolean, articleAiData?: any }
 
 class ArticleService extends MongoTransactions implements ArticleRepository {
   collection = Article.collection;
@@ -23,11 +23,16 @@ class ArticleService extends MongoTransactions implements ArticleRepository {
 
   mock?: boolean = false;
 
+  articleAiData?: any;
+
   constructor(payload: IPayloadData) {
     super();
     this.payload = new Article(payload as any);
     if (payload.mock) {
       this.mock = payload.mock;
+    }
+    if (payload.articleAiData) {
+      this.articleAiData = payload.articleAiData;
     }
     this.getOne = this.getOne.bind(this);
     this.getMany = this.getMany.bind(this);
@@ -54,7 +59,6 @@ class ArticleService extends MongoTransactions implements ArticleRepository {
     return data as any;
   }
 
-  // create happens after an Accounts was made
   async create(auth: string): Promise<any> {
     verifySimpleAuth(auth);
     const newData = this.payload.getData();
@@ -89,13 +93,13 @@ class ArticleService extends MongoTransactions implements ArticleRepository {
       previousTitles,
     })
 
-    const getNewArticleData: any = (data: any, articleId?: string) => ({
+    const getNewArticleData: any = (data: any) => ({
       customerId: newData.customerId,
-      articleId: articleId || uuidv4(),
+      articleId: data.articleId || uuidv4(),
       title: data.title,
       content: data.content,
       pictureUrl: data.pictureUrl,
-      category: blogAiConfig().category,
+      category: data.category,
       created: new Date().getTime(),
     });
 
@@ -112,38 +116,66 @@ class ArticleService extends MongoTransactions implements ArticleRepository {
     }
 
     const articleId = uuidv4();
-    await this.createOne({
-      newData: {
-        customerId: newData.customerId,
-        articleId: articleId,
-        status: ArticleStatus.PENDING,
-        message: 'Job triggered'
-      },
-      collection: Collections.ARTICLE_STATUS,
-    } as any);
+    if (!this.payload.articleAiData) {
+      await this.createOne({
+        newData: {
+          customerId: newData.customerId,
+          articleId: articleId,
+          status: ArticleStatus.PENDING,
+          message: 'Job triggered'
+        },
+        collection: Collections.ARTICLE_STATUS,
+      } as any);
+    }
 
     // Do not have to wait for this to give client response
-    triggerAiJob({
-      createArticle: (data: any) => this.createOne({ newData: data, collection: Collections.ARTICLES }),
-      blogAiConfig,
-      Article,
-      getNewArticleData: (data: any) => getNewArticleData(data, articleId),
-      updateStatus: (newData: any) => {
+    if (!this.payload.articleAiData) {
+      await triggerAiJob({ ...blogAiConfig(), articleId, customerId: newData.customerId });
+      return {
+        msg: 'Succesfully triggered AI to generate new article. It will appear soon',
+        articleId,
+      };
+    }
+
+    if (this.payload.articleAiData.error) {
+      this.updateOne({
+        query: {
+          customerId: newData.customerId,
+          articleId,
+        },
+        newData: {status: ArticleStatus.FAILED, message: `Error from EC2: ${this.payload.articleAiData.error}`},
+        collection: Collections.ARTICLE_STATUS,
+      })
+      return { msg: 'Status updated' }
+    }
+
+    if (this.payload.articleAiData) {
+      const newArticle = new Article(getNewArticleData(this.payload.articleAiData)).getData();
+      const result = await this.createOne({ newData: newArticle, collection: Collections.ARTICLES })
+      if (result.insertedCount === 1) {
         this.updateOne({
           query: {
             customerId: newData.customerId,
-            articleId: articleId,
+            articleId,
           },
-          newData,
+          newData: {status: ArticleStatus.SUCCESS, message: 'Done!'},
           collection: Collections.ARTICLE_STATUS,
         })
-      },
-    });
+        return { msg: 'Succesfully added new article.', articleId, };
+      } else {
+        this.updateOne({
+          query: {
+            customerId: newData.customerId,
+            articleId,
+          },
+          newData: {status: ArticleStatus.FAILED, message: 'Could not add document'},
+          collection: Collections.ARTICLE_STATUS,
+        })
+        return { msg: 'Could not add document.', articleId, };
+      }
+    }
 
-    return {
-      msg: 'Succesfully triggered AI to generate new article. It will appear soon',
-      articleId,
-    };
+    return { msg: 'No work done ...', articleId, };
   }
 }
 
@@ -179,7 +211,6 @@ const getMockArticle = () => ({
   category: 'Long-Distance Relationships',
   title: 'Building Successful Long-Distance Relationships: Insights from a JW Singles Perspective',
   created: new Date().getTime(),
-  id: Math.random() * 12999,
   content: "<p>Long-distance relationships can pose unique challenges, but with the right approach, they can thrive. As a JW single, it's important to apply biblical principles and truths to your dating journey. By focusing on shared faith and values, you can establish a strong foundation from the start.</p><p>Online dating can be a useful tool, enabling JW singles to connect with like-minded individuals worldwide. Jehovas Witnesses dating site online are available, providing a platform tailored to the needs of JW singles.</p><p>However, success in long-distance relationships goes beyond technology. Regular communication, trust, and understanding are key. Make time for video calls, send handwritten letters, and always be open and honest with your partner.</p><p>Remember that true success is not measured solely by physical proximity, but by the love and commitment you share. Ultimately, it's God who watches over and blesses our relationships. By following His guidance and seeking His will, you can build a successful long-distance relationship that stands the test of time.</p>"
 });
 

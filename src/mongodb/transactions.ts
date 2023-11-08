@@ -58,9 +58,10 @@ const mongoTransactions = (collection: any): Record<MongoDbTransactionTypes, any
   },
   [MongoDbTransactionTypes.FIND]: async (newData: any, query: any, collectionCallback: any) => {
     if (collectionCallback) return collectionCallbackHandler(collectionCallback, collection);
+    const TID = getTid(query);
     const res = await collection.find({
       ...query,
-      TID: getTid(query),
+      ...TID && { TID },
     }).sort({ created: -1 }).toArray();
     return res;
   },
@@ -69,21 +70,23 @@ const mongoTransactions = (collection: any): Record<MongoDbTransactionTypes, any
     return res;
   },
   [MongoDbTransactionTypes.DELETE_ONE]: async (newData: any, query: any) => {
+    const TID = getTid(query);
     const res = await collection.deleteOne({
       ...query,
-      TID: getTid(query),
+      ...TID && { TID },
     });
     return res;
   },
   [MongoDbTransactionTypes.UPDATE_ONE]: async (newData: any, query: any, collectionCallback: any) => {
     if (collectionCallback) return collectionCallbackHandler(collectionCallback, collection);
+    const TID = getTid(query);
     const data = {
       ...newData,
     };
     delete data.created;
     const res = await collection.updateOne({
       ...query,
-      TID: getTid(query),
+      ...TID && { TID },
     },
     {
       $set: newData,

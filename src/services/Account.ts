@@ -41,6 +41,8 @@ class AccountService extends MongoTransactions implements AccountRepository {
     const newData = this.payload.getData(true);
     const data = await this.findOne({ query: { customerId: this.payload.customerId } });
     if (data) throw new Error(`CustomerID already exists ${HttpStatusCodes.BAD_REQUEST}`);
+    const findMail = await this.findOne({ query: { mail: this.payload.mail } });
+    if (findMail) throw new Error(`Customer with this mail already exists ${HttpStatusCodes.BAD_REQUEST}`);
     
 
     await this.createOne({
