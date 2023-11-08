@@ -38,8 +38,7 @@ export const API = {
   },
   triggerEc2: async (payload: any) => {
     // ec2 instance IP
-    const url = 'http://13.48.104.149/api/v1/article';
-    // const url = 'http://localhost:5000/api/v1/article';
+    const url = `${process.env.EC2_IP_ENDPOINT}/api/v1/article`;
     const data = await fetchMethod(
       url,
       MethodTypes.POST,
