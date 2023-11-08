@@ -80,7 +80,7 @@ class ArticleService extends MongoTransactions implements ArticleRepository {
         .limit(30)             // Limit the result to x documents
         .project({ _id: 0, title: 1 }) // Only return the 'title' field, exclude '_id'
         .toArray();
-        return res;
+        return res.map((t: any) => t.title);
       }
     });
     const previousTitles = prevArticles;
@@ -116,62 +116,68 @@ class ArticleService extends MongoTransactions implements ArticleRepository {
     }
 
     const articleId = uuidv4();
-    if (!this.payload.articleAiData) {
-      await this.createOne({
-        newData: {
-          customerId: newData.customerId,
-          articleId: articleId,
-          status: ArticleStatus.PENDING,
-          message: 'Job triggered'
-        },
-        collection: Collections.ARTICLE_STATUS,
-      } as any);
-    }
 
-    // Do not have to wait for this to give client response
-    if (!this.payload.articleAiData) {
-      await triggerAiJob({ ...blogAiConfig(), articleId, customerId: newData.customerId });
-      return {
-        msg: 'Succesfully triggered AI to generate new article. It will appear soon',
-        articleId,
-      };
-    }
+    if (!this.articleAiData) {
+      const res = await triggerAiJob({ ...blogAiConfig(), articleId, customerId: newData.customerId });
+      if (res.statusCode === 200) {
+        await this.createOne({
+          newData: {
+            customerId: newData.customerId,
+            articleId: articleId,
+            status: ArticleStatus.PENDING,
+            message: 'Job triggered'
+          },
+          collection: Collections.ARTICLE_STATUS,
+        } as any);
 
-    if (this.payload.articleAiData.error) {
-      this.updateOne({
-        query: {
-          customerId: newData.customerId,
+        return {
+          msg: res.data.msg,
           articleId,
+        };
+      } else {
+        return {
+          msg: res.data.errorMsg,
+          articleId,
+          statusCode: 500
+        };
+      }
+    }
+
+    if (this.articleAiData.error) {
+      await this.updateOne({
+        query: {
+          customerId: this.articleAiData.customerId,
+          articleId: this.articleAiData.articleId,
         },
-        newData: {status: ArticleStatus.FAILED, message: `Error from EC2: ${this.payload.articleAiData.error}`},
+        newData: {status: ArticleStatus.FAILED, message: `Error from EC2: ${this.articleAiData.error}`},
         collection: Collections.ARTICLE_STATUS,
       })
-      return { msg: 'Status updated' }
+      return { msg: 'Status updated to failed' }
     }
 
-    if (this.payload.articleAiData) {
-      const newArticle = new Article(getNewArticleData(this.payload.articleAiData)).getData();
+    if (this.articleAiData) {
+      const newArticle = new Article(getNewArticleData(this.articleAiData)).getData();
       const result = await this.createOne({ newData: newArticle, collection: Collections.ARTICLES })
-      if (result.insertedCount === 1) {
-        this.updateOne({
+      if (result.acknowledged) {
+        await this.updateOne({
           query: {
-            customerId: newData.customerId,
-            articleId,
+            customerId: this.articleAiData.customerId,
+            articleId: this.articleAiData.articleId,
           },
           newData: {status: ArticleStatus.SUCCESS, message: 'Done!'},
           collection: Collections.ARTICLE_STATUS,
         })
-        return { msg: 'Succesfully added new article.', articleId, };
+        return { msg: 'Succesfully added new article.', articleId: this.articleAiData.articleId, };
       } else {
-        this.updateOne({
+        await this.updateOne({
           query: {
-            customerId: newData.customerId,
-            articleId,
+            customerId: this.articleAiData.customerId,
+            articleId: this.articleAiData.articleId,
           },
           newData: {status: ArticleStatus.FAILED, message: 'Could not add document'},
           collection: Collections.ARTICLE_STATUS,
         })
-        return { msg: 'Could not add document.', articleId, };
+        return { msg: 'Could not add document.', articleId: this.articleAiData.articleId, };
       }
     }
 
