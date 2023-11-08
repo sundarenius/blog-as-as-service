@@ -213,7 +213,7 @@ const article = async ({
 };
 
 const getMockArticle = () => ({
-  pictureUrl: 'https://pixabay.com/get/gdd16b95cba0bd978c9565f3be3f2aa3e3d3e4d49a0cb870164f3cdadd1a6840b534e78055b73b7f63347431243eaefc6c7a557e17759d976c2b5cc1217ef4262_640.jpg',
+  pictureUrl: 'https://firebasestorage.googleapis.com/v0/b/connect-platform-372bd.appspot.com/o/default%2Fnice.jpeg?alt=media&token=79eb3a92-037b-42f2-8f39-dcc24d93121b',
   category: 'Long-Distance Relationships',
   title: 'Building Successful Long-Distance Relationships: Insights from a JW Singles Perspective',
   created: new Date().getTime(),

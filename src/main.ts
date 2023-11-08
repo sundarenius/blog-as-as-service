@@ -14,7 +14,8 @@ const app: any = express();
 const whiteListedOrigins: string[] = [
   'http://localhost:3000',
   'http://localhost:3030/',
-  'http://13.48.104.149' // ec2 instance
+  'http://13.48.104.149', // ec2 instance
+  'https://www.blog.jwdate.org'
 ];
 
 const corsOptionsDelegate = (req: any, callback: any) => {
