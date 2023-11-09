@@ -46,6 +46,8 @@ class ArticleService extends MongoTransactions implements ArticleRepository {
     });
 
     if (!data) throw new Error(`Article not found ${HttpStatusCodes.BAD_REQUEST}`);
+
+    data.created = new Date(data.created).toISOString().toString().replace('T', ' ').substring(0, 19);
     
     return data as any;
   }
@@ -56,7 +58,10 @@ class ArticleService extends MongoTransactions implements ArticleRepository {
       collectionCallback: findFilterAndOrder(filter),
     });
 
-    return data as any;
+    return data.map((d: any) => ({
+      ...d,
+      created: new Date(d.created).toISOString().toString().replace('T', ' ').substring(0, 19),
+    })) as any;
   }
 
   async create(auth: string): Promise<any> {
