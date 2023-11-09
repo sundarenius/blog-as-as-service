@@ -60,6 +60,7 @@ class ArticleService extends MongoTransactions implements ArticleRepository {
 
     return data.map((d: any) => ({
       ...d,
+      content: '',
       created: new Date(d.created).toISOString().toString().replace('T', ' ').substring(0, 19),
     })) as any;
   }

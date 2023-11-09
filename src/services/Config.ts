@@ -10,16 +10,21 @@ import {
 } from '../utils/auth';
 import type { ConfigRepository } from '../repositories/ConfigRepository';
 
-type IPayloadData = Partial<Config>;
+type IPayloadData = Partial<Config> & { categoriesOnly?: boolean };
 
 class ConfigService extends MongoTransactions implements ConfigRepository {
   collection = Config.collection;
 
   payload: { getData: (requireAllFields?: boolean) => IPayloadData } & IPayloadData;
 
+  categoriesOnly?: boolean = false;
+
   constructor(payload: IPayloadData) {
     super();
     this.payload = new Config(payload as any);
+    if (payload.categoriesOnly) {
+      this.categoriesOnly = payload.categoriesOnly;
+    }
     this.getOne = this.getOne.bind(this);
     this.create = this.create.bind(this);
     this.update = this.update.bind(this);
@@ -32,6 +37,10 @@ class ConfigService extends MongoTransactions implements ConfigRepository {
     });
 
     if (!data) throw new Error(`Config not found ${HttpStatusCodes.BAD_REQUEST}`);
+
+    if (this.categoriesOnly) {
+      return data.categories;
+    }
     
     return data as any;
   }
