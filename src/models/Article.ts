@@ -9,6 +9,7 @@ export interface ArticleEntity {
   content: string,
   pictureUrl: string,
   created: number,
+  tag?: string,
 }
 
 class Article implements ArticleEntity {
@@ -28,6 +29,8 @@ class Article implements ArticleEntity {
 
   created: number;
 
+  tag?: string;
+
   constructor(payload: ArticleEntity) {
     this.customerId = payload.customerId;
     this.articleId = payload.articleId;
@@ -36,6 +39,7 @@ class Article implements ArticleEntity {
     this.content = payload.content;
     this.pictureUrl = payload.pictureUrl;
     this.created = payload.created;
+    this.tag = payload.tag;
   }
 
   getData(allRequired = false): Partial<ArticleEntity> {
@@ -47,6 +51,7 @@ class Article implements ArticleEntity {
       content: this.content,
       pictureUrl: this.pictureUrl,
       created: this.created,
+      tag: this.tag
     };
 
     return getModelData<ArticleEntity>(allRequired, data);

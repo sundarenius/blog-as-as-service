@@ -107,6 +107,7 @@ class ArticleService extends MongoTransactions implements ArticleRepository {
       pictureUrl: data.pictureUrl,
       category: data.category,
       created: new Date().getTime(),
+      tag: data.tag,
     });
 
     if (this.mock) {
