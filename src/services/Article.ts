@@ -28,7 +28,7 @@ class ArticleService extends MongoTransactions implements ArticleRepository {
   constructor(payload: IPayloadData) {
     super();
     this.payload = new Article(payload as any);
-    if (payload.mock) {
+    if (payload.mock && process.env.NODE_ENV !== 'production') {
       this.mock = payload.mock;
     }
     if (payload.articleAiData) {
