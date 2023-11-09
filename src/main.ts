@@ -16,7 +16,8 @@ const whiteListedOrigins: string[] = [
   'http://localhost:3030/',
   'http://13.48.104.149', // ec2 instance
   'https://www.blog.jwdate.org',
-  'https://www.jwdate.org'
+  'https://www.jwdate.org',
+  'https://www.philippinebeauty.com/',
 ];
 
 const corsOptionsDelegate = (req: any, callback: any) => {
