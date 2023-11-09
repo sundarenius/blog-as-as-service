@@ -17,7 +17,10 @@ const whiteListedOrigins: string[] = [
   'http://13.48.104.149', // ec2 instance
   'https://www.blog.jwdate.org',
   'https://www.jwdate.org',
-  'https://www.philippinebeauty.com/',
+  'http://www.jwdate.org',
+  'https://www.philippinebeauty.com',
+  'http://www.philippinebeauty.com',
+  'https://www.blog.philippinebeauty.com',
 ];
 
 const corsOptionsDelegate = (req: any, callback: any) => {
