@@ -21,6 +21,8 @@ const whiteListedOrigins: string[] = [
   'https://www.philippinebeauty.com',
   'http://www.philippinebeauty.com',
   'https://www.blog.philippinebeauty.com',
+  'https://www.queenofafrica.org',
+  'https://www.blog.queenofafrica.org'
 ];
 
 const corsOptionsDelegate = (req: any, callback: any) => {
