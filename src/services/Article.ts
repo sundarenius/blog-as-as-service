@@ -81,7 +81,7 @@ class ArticleService extends MongoTransactions implements ArticleRepository {
     const prevArticles = await this.findMany({
       collection: Collections.ARTICLES,
       collectionCallback: async (collection: any) => {
-        const res = await collection.find({})
+        const res = await collection.find({ customerId: newData.customerId })
         .sort({ created: -1 }) // Sort by created field in descending order (latest first)
         .limit(30)             // Limit the result to x documents
         .project({ _id: 0, title: 1 }) // Only return the 'title' field, exclude '_id'
