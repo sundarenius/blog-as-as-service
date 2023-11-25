@@ -25,6 +25,7 @@ const whiteListedOrigins: string[] = [
   'https://www.globeromance.com',
   'https://www.blog.globeromance.org',
   'https://www.blog.disabilitymatch.org',
+  'https://www.disabilitymatch.org',
 ];
 
 const corsOptionsDelegate = (req: any, callback: any) => {
