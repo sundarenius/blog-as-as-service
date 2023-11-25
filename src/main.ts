@@ -23,7 +23,8 @@ const whiteListedOrigins: string[] = [
   'https://www.queenofafrica.org',
   'https://www.blog.queenofafrica.org',
   'https://www.globeromance.com',
-  'https://www.blog.globeromance.org'
+  'https://www.blog.globeromance.org',
+  'https://www.blog.disabilitymatch.org',
 ];
 
 const corsOptionsDelegate = (req: any, callback: any) => {
