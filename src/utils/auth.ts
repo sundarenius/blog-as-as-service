@@ -5,7 +5,7 @@ import bcrypt from 'bcrypt';
 
 export const verifySimpleAuth = (auth: string) => {
   const token = auth.split(' ')[1]
-  if (token !== process.env.MY_API_POST_KEY) {
+  if (token !== process.env.HAKAN_API_SECRET) {
     throw new Error(`Not allowed ${HttpStatusCodes.UNAUTHORIZED}`);
   }
 }

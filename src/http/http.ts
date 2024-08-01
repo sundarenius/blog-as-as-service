@@ -43,7 +43,7 @@ export const API = {
       url,
       MethodTypes.POST,
       payload,
-      { Authorization: `Bearer ${process.env.MY_API_POST_KEY}`, }
+      { Authorization: `Bearer ${process.env.HAKAN_API_SECRET}`, }
     );
     return data;
   },

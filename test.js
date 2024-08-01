@@ -33,7 +33,7 @@ const getUrl = () => urls.dev;
 
 
 const init = async () => {
-  const getPictures = await req(process.env.MY_API_POST_KEY)(
+  const getPictures = await req(process.env.HAKAN_API_SECRET)(
     'GET',
     null,
     `https://pixabay.com/api/?key=${process.env.PIXABAY_API_KEY}&q="Dating in Different Cultures"&image_type=photo`
