@@ -10,6 +10,7 @@ export interface ArticleEntity {
   pictureUrl: string,
   created: number,
   tag?: string,
+  minutesRead?: number,
 }
 
 class Article implements ArticleEntity {
@@ -31,6 +32,8 @@ class Article implements ArticleEntity {
 
   tag?: string;
 
+  minutesRead?: number;
+
   constructor(payload: ArticleEntity) {
     this.customerId = payload.customerId;
     this.articleId = payload.articleId;
@@ -40,6 +43,7 @@ class Article implements ArticleEntity {
     this.pictureUrl = payload.pictureUrl;
     this.created = payload.created;
     this.tag = payload.tag;
+    this.minutesRead = payload.minutesRead;
   }
 
   getData(allRequired = false): Partial<ArticleEntity> {
@@ -51,7 +55,8 @@ class Article implements ArticleEntity {
       content: this.content,
       pictureUrl: this.pictureUrl,
       created: this.created,
-      tag: this.tag
+      tag: this.tag,
+      minutesRead: this.minutesRead
     };
 
     return getModelData<ArticleEntity>(allRequired, data);
