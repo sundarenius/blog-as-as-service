@@ -109,12 +109,13 @@ class ArticleService extends MongoTransactions implements ArticleRepository {
       created: new Date().getTime(),
       tag: data.tag,
       keyword: data.keyword,
+      ...data,
     });
 
     if (this.mock) {
       for (let i = 0; i < 50; i++) {
         const mockData = getNewArticleData(getMockArticle());
-        const mockArticle = new Article(mockData).getData()
+        const mockArticle = new Article(mockData).getData();
         await this.createOne({ newData: mockArticle} as any);
       }
       // do not continue
